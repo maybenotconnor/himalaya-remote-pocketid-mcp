@@ -1,0 +1,57 @@
+services:
+  himalaya-remote-pocketid-mcp:
+    build: .
+    image: himalaya-remote-pocketid-mcp:local
+    container_name: himalaya-remote-pocketid-mcp
+    restart: unless-stopped
+
+    # Pangolin (Newt) proxies to this port. Bind to the LAN address Newt
+    # reaches, for example BIND_ADDR=192.168.50.130 in .env.
+    ports:
+      - "${BIND_ADDR:-127.0.0.1}:${HOST_PORT:-8765}:8000"
+
+    environment:
+      BASE_URL: ${BASE_URL}                    # public URL, no trailing slash
+      OIDC_CONFIG_URL: ${OIDC_CONFIG_URL}      # PocketID discovery URL
+      OIDC_CLIENT_ID: ${OIDC_CLIENT_ID}
+      OIDC_CLIENT_SECRET_FILE: /run/secrets/oidc_client_secret
+      JWT_SIGNING_KEY_FILE: /run/secrets/jwt_signing_key
+      STORAGE_ENCRYPTION_KEY_FILE: /run/secrets/storage_encryption_key
+      HIMALAYA_ALLOW_WRITE: ${HIMALAYA_ALLOW_WRITE:-true}   # flags, move, save drafts
+      HIMALAYA_ALLOW_SEND: ${HIMALAYA_ALLOW_SEND:-false}    # send mail
+      HIMALAYA_ACCOUNTS: ${HIMALAYA_ACCOUNTS:-}        # optional subset, comma-separated
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+
+    volumes:
+      - ./config:/config:ro                    # himalaya.toml + ortie.toml
+      - himalaya-data:/data                        # ortie tokens + OAuth client store
+
+    secrets:
+      - oidc_client_secret
+      - jwt_signing_key
+      - storage_encryption_key
+      # - fastmail_password                    # one per app-password account
+
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop: [ALL]
+    security_opt:
+      - no-new-privileges:true
+
+    labels:
+      # Built locally, so Watchtower has no registry image to pull.
+      com.centurylinklabs.watchtower.enable: "false"
+
+volumes:
+  himalaya-data:
+
+secrets:
+  oidc_client_secret:
+    file: ./secrets/oidc_client_secret
+  jwt_signing_key:
+    file: ./secrets/jwt_signing_key
+  storage_encryption_key:
+    file: ./secrets/storage_encryption_key
+  # fastmail_password:
+  #   file: ./secrets/fastmail_password

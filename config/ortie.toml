@@ -1,0 +1,54 @@
+# ==============================================================================
+# ortie OAuth accounts. Names match the Himalaya accounts that use them.
+#
+# Tokens are stored as files in the /data volume (mode 600). Sign in once per
+# account with:   docker compose exec himalaya-remote-pocketid-mcp himalaya-login <name>
+# After that, ortie refreshes the access token automatically.
+#
+# Full reference: https://github.com/pimalaya/ortie/blob/master/config.sample.toml
+# ==============================================================================
+
+
+# --- Gmail ---------------------------------------------------------------------
+[accounts.gmail]
+endpoints.authorization = "https://accounts.google.com/o/oauth2/v2/auth"
+endpoints.token = "https://oauth2.googleapis.com/token"
+scopes = ["https://mail.google.com/"]
+extras.access_type = "offline"
+extras.prompt = "consent"
+auto-refresh = true
+
+# Option A (works now): Thunderbird's public client, verified by Google.
+# These values are published in the ortie README.
+client-id = "406964657835-aq8lmia8j95dhl1a2bvharmfk3t1hgqj.apps.googleusercontent.com"
+client-secret.raw = "kSmqreRr0qwBWJgbf5Y-PjSU"
+endpoints.redirection = "http://localhost"
+
+# Option B: your own Google Cloud client (type "Desktop app", Gmail API on).
+# An unverified app in "Testing" status expires refresh tokens after 7 days.
+#client-id = "<your-client-id>.apps.googleusercontent.com"
+#client-secret.command = ["cat", "/run/secrets/gmail_oauth_client_secret"]
+#endpoints.redirection = "http://localhost"
+
+storage.read.command = ["cat", "/data/ortie/gmail.json"]
+storage.write.command = "umask 077 && cat > /data/ortie/gmail.json"
+
+
+# --- Microsoft 365 / Outlook (IMAP + SMTP) ---------------------------------------
+[accounts.m365]
+endpoints.authorization = "https://login.microsoftonline.com/common/oauth2/v2.0/authorize"
+endpoints.token = "https://login.microsoftonline.com/common/oauth2/v2.0/token"
+scopes = [
+  "https://outlook.office.com/IMAP.AccessAsUser.All",
+  "https://outlook.office.com/SMTP.Send",
+  "offline_access",
+]
+auto-refresh = true
+
+# Thunderbird's public client for Outlook IMAP/SMTP. If your tenant blocks
+# user consent, a tenant admin must approve "Mozilla Thunderbird" once.
+client-id = "9e5f94bc-e8a4-4e73-b8be-63364c29d753"
+endpoints.redirection = "https://localhost"
+
+storage.read.command = ["cat", "/data/ortie/m365.json"]
+storage.write.command = "umask 077 && cat > /data/ortie/m365.json"

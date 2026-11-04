@@ -1,0 +1,62 @@
+# ==============================================================================
+# Himalaya accounts. One [accounts.<name>] table per mailbox.
+#
+# The gateway reads the table names from this file. Each name becomes the
+# tool prefix in Claude: [accounts.gmail] gives gmail_envelope_list,
+# gmail_message_read, and so on. Use short lowercase names.
+#
+# OAuth accounts get their token from ortie (see ortie.toml, same names).
+# App-password accounts read a Docker secret file.
+#
+# Full reference: https://github.com/pimalaya/himalaya/blob/master/config.sample.toml
+# ==============================================================================
+
+
+# --- Gmail over IMAP/SMTP, OAuth through ortie --------------------------------
+[accounts.gmail]
+default = true
+email = "you@gmail.com"
+display-name = "Your Name"
+
+imap.server = "imaps://imap.gmail.com:993"
+imap.sasl.xoauth2.username = "you@gmail.com"
+imap.sasl.xoauth2.token.command = ["ortie", "token", "show", "-a", "gmail"]
+
+smtp.server = "smtps://smtp.gmail.com:465"
+smtp.sasl.xoauth2.username = "you@gmail.com"
+smtp.sasl.xoauth2.token.command = ["ortie", "token", "show", "-a", "gmail"]
+
+mailbox.alias.inbox = "INBOX"
+mailbox.alias.sent = "[Gmail]/Sent Mail"
+mailbox.alias.drafts = "[Gmail]/Drafts"
+mailbox.alias.trash = "[Gmail]/Trash"
+mailbox.alias.archive = "[Gmail]/All Mail"
+
+
+# --- Microsoft 365 / Outlook over IMAP/SMTP, OAuth through ortie --------------
+[accounts.m365]
+email = "you@yourdomain.com"
+display-name = "Your Name"
+
+imap.server = "imaps://outlook.office365.com:993"
+imap.sasl.xoauth2.username = "you@yourdomain.com"
+imap.sasl.xoauth2.token.command = ["ortie", "token", "show", "-a", "m365"]
+
+smtp.server = "smtp://smtp.office365.com:587"
+smtp.starttls = true
+smtp.sasl.xoauth2.username = "you@yourdomain.com"
+smtp.sasl.xoauth2.token.command = ["ortie", "token", "show", "-a", "m365"]
+
+
+# --- Any IMAP host with an app password (Fastmail, iCloud, Posteo, ...) -------
+# Put the password in ./secrets/<name>_password and list that secret in
+# compose.yaml. Remove this block if you don't need it.
+#[accounts.fastmail]
+#email = "you@fastmail.com"
+#display-name = "Your Name"
+#imap.server = "imaps://imap.fastmail.com"
+#imap.sasl.plain.username = "you@fastmail.com"
+#imap.sasl.plain.password.command = ["cat", "/run/secrets/fastmail_password"]
+#smtp.server = "smtps://smtp.fastmail.com"
+#smtp.sasl.plain.username = "you@fastmail.com"
+#smtp.sasl.plain.password.command = ["cat", "/run/secrets/fastmail_password"]

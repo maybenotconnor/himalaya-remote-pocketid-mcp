@@ -1,0 +1,55 @@
+#!/usr/bin/env python3
+"""One-time OAuth sign-in for an ortie account, from inside the container.
+
+    docker compose exec himalaya-remote-pocketid-mcp himalaya-login <account>
+
+1. Prints the sign-in link. Open it in any browser and approve.
+2. The browser then goes to a localhost page that does not load. That is
+   expected. Copy the full address from the address bar.
+3. Paste it here. ortie exchanges it for tokens and stores them in /data/ortie.
+"""
+
+import json
+import subprocess
+import sys
+
+
+def main() -> int:
+    if len(sys.argv) != 2 or sys.argv[1] in {"-h", "--help"}:
+        print(__doc__.strip())
+        return 2
+    account = sys.argv[1]
+
+    start = subprocess.run(
+        ["ortie", "--json", "auth", "get", "-a", account],
+        capture_output=True, text=True, stdin=subprocess.DEVNULL,
+    )
+    if start.returncode != 0:
+        sys.stderr.write(start.stderr or start.stdout)
+        return start.returncode
+    flow = json.loads(start.stdout)
+
+    # Device grant: ortie returns a user code instead of a link.
+    if "device_code" in flow:
+        print(json.dumps({k: v for k, v in flow.items() if k != "device_code"}, indent=2))
+        input("\nEnter the code at the address above, approve, then press Enter here... ")
+        done = subprocess.run(["ortie", "auth", "resume", "-a", account, flow["device_code"]])
+        return done.returncode
+
+    print("\nOpen this link in a browser and approve:\n")
+    print(flow["authorization_uri"])
+    print("\nThe browser then shows a localhost page that does not load. Copy its full address.")
+    redirected = input("\nPaste the address here: ").strip()
+
+    cmd = ["ortie", "auth", "resume", "-a", account, f"--state={flow['state']}"]
+    if flow.get("pkce_code_verifier"):
+        cmd.append(f"--pkce={flow['pkce_code_verifier']}")
+    cmd.append(redirected)
+    done = subprocess.run(cmd)
+    if done.returncode == 0:
+        subprocess.run(["ortie", "token", "inspect", "-a", account])
+    return done.returncode
+
+
+if __name__ == "__main__":
+    sys.exit(main())
