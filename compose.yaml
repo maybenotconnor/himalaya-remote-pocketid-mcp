@@ -11,10 +11,10 @@ services:
       - "${BIND_ADDR:-127.0.0.1}:${HOST_PORT:-8765}:8000"
 
     environment:
-      BASE_URL: ${BASE_URL}                    # public URL, no trailing slash
-      OIDC_CONFIG_URL: ${OIDC_CONFIG_URL}      # PocketID discovery URL
-      OIDC_CLIENT_ID: ${OIDC_CLIENT_ID}
-      OIDC_CLIENT_SECRET_FILE: /run/secrets/oidc_client_secret
+      MCP_BASE_URL: ${MCP_BASE_URL}            # public URL, no trailing slash
+      POCKETID_CONFIG_URL: ${POCKETID_CONFIG_URL}  # PocketID discovery URL
+      POCKETID_CLIENT_ID: ${POCKETID_CLIENT_ID}
+      POCKETID_CLIENT_SECRET_FILE: /run/secrets/pocketid_client_secret
       JWT_SIGNING_KEY_FILE: /run/secrets/jwt_signing_key
       STORAGE_ENCRYPTION_KEY_FILE: /run/secrets/storage_encryption_key
       HIMALAYA_ALLOW_WRITE: ${HIMALAYA_ALLOW_WRITE:-true}   # flags, move, save drafts
@@ -27,7 +27,7 @@ services:
       - himalaya-data:/data                        # ortie tokens + OAuth client store
 
     secrets:
-      - oidc_client_secret
+      - pocketid_client_secret
       - jwt_signing_key
       - storage_encryption_key
       # - fastmail_password                    # one per app-password account
@@ -47,8 +47,8 @@ volumes:
   himalaya-data:
 
 secrets:
-  oidc_client_secret:
-    file: ./secrets/oidc_client_secret
+  pocketid_client_secret:
+    file: ./secrets/pocketid_client_secret
   jwt_signing_key:
     file: ./secrets/jwt_signing_key
   storage_encryption_key:

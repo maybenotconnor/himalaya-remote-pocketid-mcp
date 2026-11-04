@@ -26,7 +26,7 @@ log = logging.getLogger("himalaya-remote-pocketid-mcp")
 logging.basicConfig(level=os.environ.get("LOG_LEVEL", "INFO"), format="%(levelname)s %(name)s: %(message)s")
 
 # Environment names that hold gateway secrets. They are not passed to Himalaya.
-GATEWAY_SECRET_PREFIXES = ("OIDC_", "JWT_", "STORAGE_ENCRYPTION_")
+GATEWAY_SECRET_PREFIXES = ("POCKETID_", "JWT_", "STORAGE_ENCRYPTION_")
 
 
 def env(name: str, default: str | None = None, *, required: bool = False) -> str | None:
@@ -85,13 +85,15 @@ def build_auth():
         fernet=Fernet(env("STORAGE_ENCRYPTION_KEY", required=True)),
     )
 
+    # Same PocketID settings as opencloud-pocketid-mcp: request openid, profile
+    # and email, and verify PocketID's ID token rather than its access token.
     return OIDCProxy(
-        config_url=env("OIDC_CONFIG_URL", required=True),
-        client_id=env("OIDC_CLIENT_ID", required=True),
-        client_secret=env("OIDC_CLIENT_SECRET", required=True),
-        audience=env("OIDC_AUDIENCE"),
-        base_url=env("BASE_URL", required=True),
-        required_scopes=csv("OIDC_REQUIRED_SCOPES", "openid"),
+        config_url=env("POCKETID_CONFIG_URL", required=True),
+        client_id=env("POCKETID_CLIENT_ID", required=True),
+        client_secret=env("POCKETID_CLIENT_SECRET", required=True),
+        base_url=env("MCP_BASE_URL", required=True),
+        required_scopes=csv("POCKETID_SCOPES", "openid,profile,email"),
+        verify_id_token=True,
         allowed_client_redirect_uris=csv(
             "ALLOWED_CLIENT_REDIRECT_URIS",
             "https://claude.ai/api/mcp/auth_callback,http://localhost:*,http://127.0.0.1:*",
@@ -130,8 +132,8 @@ def build_server() -> FastMCP:
         mcp.mount(create_proxy(transport, mode="auto", name=f"himalaya-{account}"), namespace=account)
         log.info("mounted account %r as tools prefixed %r", account, f"{account}_")
 
-    @mcp.custom_route("/healthz", methods=["GET"])
-    async def healthz(_: Request) -> PlainTextResponse:
+    @mcp.custom_route("/health", methods=["GET"])
+    async def health(_: Request) -> PlainTextResponse:
         return PlainTextResponse("ok")
 
     return mcp

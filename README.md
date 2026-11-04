@@ -36,7 +36,7 @@ mkdir -p secrets && chmod 700 secrets
 openssl rand -base64 48 > secrets/jwt_signing_key
 python3 -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())" > secrets/storage_encryption_key
 # No local Python? Use: openssl rand -base64 32 | tr '+/' '-_' > secrets/storage_encryption_key
-touch secrets/oidc_client_secret        # filled in step 3
+touch secrets/pocketid_client_secret        # filled in step 3
 chmod 600 secrets/*
 ```
 
@@ -48,14 +48,17 @@ in both files.
 
 ### 3. Create the PocketID client
 
-In PocketID, create an OIDC client:
+In PocketID, go to **Admin > Settings > OIDC Clients** and create a client
+with the same settings as opencloud-pocketid-mcp:
 
 - Name: `himalaya-remote-pocketid-mcp`
-- Callback URL: `https://<your BASE_URL host>/auth/callback`
-- Public client: off
+- Type: **confidential** (Public client off)
+- Callback URL: `https://<your MCP_BASE_URL host>/auth/callback`
+- PKCE: on, with the S256 method
+- Scopes: `openid profile email`
 - Allowed user groups: only your own user or group
 
-Put the client secret in `secrets/oidc_client_secret` and the client ID in `.env`.
+Put the client secret in `secrets/pocketid_client_secret` and the client ID in `.env`.
 
 ### 4. Set `.env` and start
 
@@ -86,7 +89,7 @@ docker compose exec himalaya-remote-pocketid-mcp himalaya -c /config/himalaya.to
 
 ### 6. Publish through Pangolin
 
-Create an HTTPS resource for `BASE_URL` with the target `BIND_ADDR:HOST_PORT`.
+Create an HTTPS resource for `MCP_BASE_URL` with the target `BIND_ADDR:HOST_PORT`.
 **Turn Pangolin authentication off on this resource.** Claude connects from
 Anthropic's servers and can't complete a Pangolin browser login. The PocketID
 OAuth in the container controls access instead.
@@ -95,7 +98,7 @@ OAuth in the container controls access instead.
 
 Customize → Connectors → Add custom connector:
 
-- URL: `https://<your BASE_URL host>/mcp`
+- URL: `https://<your MCP_BASE_URL host>/mcp`
 - Authentication: sign in
 - OAuth client: "Use Claude's published identity" or "Register automatically"
 
@@ -110,7 +113,7 @@ Claude opens a PocketID login, then a consent page from the gateway. Approve bot
 | Force a refresh | `docker compose exec himalaya-remote-pocketid-mcp ortie token refresh -a gmail` |
 | Sign in again | `docker compose exec himalaya-remote-pocketid-mcp himalaya-login gmail` |
 | Upgrade Himalaya | change `HIMALAYA_REV` in the Dockerfile, then `docker compose up -d --build` |
-| Health | `curl http://BIND_ADDR:HOST_PORT/healthz` |
+| Health | `curl http://BIND_ADDR:HOST_PORT/health` |
 
 Back up the `himalaya-data` volume with Restic. It holds the OAuth refresh tokens
 and the gateway's encrypted client store. Without it you must sign in again.
