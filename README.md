@@ -89,7 +89,7 @@ docker compose exec himalaya-remote-pocketid-mcp himalaya -c /config/himalaya.to
 
 ### 6. Publish through Pangolin
 
-Create an HTTPS resource for `MCP_BASE_URL` with the target `BIND_ADDR:HOST_PORT`.
+Create an HTTPS resource for `MCP_BASE_URL` with the target `localhost:8765` (or `BIND_ADDR:HOST_PORT` if you changed them).
 **Turn Pangolin authentication off on this resource.** Claude connects from
 Anthropic's servers and can't complete a Pangolin browser login. The PocketID
 OAuth in the container controls access instead.
@@ -113,7 +113,7 @@ Claude opens a PocketID login, then a consent page from the gateway. Approve bot
 | Force a refresh | `docker compose exec himalaya-remote-pocketid-mcp ortie token refresh -a gmail` |
 | Sign in again | `docker compose exec himalaya-remote-pocketid-mcp himalaya-login gmail` |
 | Upgrade Himalaya | change `HIMALAYA_REV` in the Dockerfile, then `docker compose up -d --build` |
-| Health | `curl http://BIND_ADDR:HOST_PORT/health` |
+| Health | `curl http://127.0.0.1:8765/health` |
 
 Back up the `himalaya-data` volume with Restic. It holds the OAuth refresh tokens
 and the gateway's encrypted client store. Without it you must sign in again.

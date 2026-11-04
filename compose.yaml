@@ -5,8 +5,8 @@ services:
     container_name: himalaya-remote-pocketid-mcp
     restart: unless-stopped
 
-    # Pangolin (Newt) proxies to this port. Bind to the LAN address Newt
-    # reaches, for example BIND_ADDR=192.168.50.130 in .env.
+    # Pangolin (Newt) proxies to this port. Newt installed on the host reaches
+    # 127.0.0.1. Set BIND_ADDR to a LAN address only if Newt runs elsewhere.
     ports:
       - "${BIND_ADDR:-127.0.0.1}:${HOST_PORT:-8765}:8000"
 
