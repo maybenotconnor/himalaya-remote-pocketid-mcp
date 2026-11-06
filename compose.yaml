@@ -30,7 +30,7 @@ services:
       - pocketid_client_secret
       - jwt_signing_key
       - storage_encryption_key
-      # Account passwords go in compose.override.yaml (see the example file).
+      # - fastmail_password                    # one per app-password account
 
     read_only: true
     tmpfs:
@@ -53,3 +53,5 @@ secrets:
     file: ./secrets/jwt_signing_key
   storage_encryption_key:
     file: ./secrets/storage_encryption_key
+  # fastmail_password:
+  #   file: ./secrets/fastmail_password

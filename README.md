@@ -20,11 +20,6 @@ Everything is declared in files:
 | `.env` | Public URL, PocketID client ID, bind address, tool flags. |
 | `secrets/` | PocketID client secret, JWT key, storage key, app passwords. |
 | `compose.yaml` | The container. |
-| `compose.override.yaml` | Your password secrets for IMAP accounts. |
-
-`config/himalaya.toml`, `config/ortie.toml` and `compose.override.yaml` are
-yours: git ignores them, so `git pull` never conflicts with your accounts.
-The repo ships `*.example*` versions to copy from.
 
 To add a mailbox, add a table to `himalaya.toml` (and `ortie.toml` for OAuth),
 restart, and run `himalaya-login` once. Nothing else changes.
@@ -47,20 +42,9 @@ chmod 600 secrets/*
 
 ### 2. Fill in the mailbox configs
 
-```sh
-cp config/himalaya.example.toml config/himalaya.toml
-cp config/ortie.example.toml config/ortie.toml
-```
-
-Edit both files. Replace the example addresses. Delete the accounts you don't
-use. Keep the account names the same in both files.
-
-For an IMAP account with a password, also list its secret file in
-`compose.override.yaml`:
-
-```sh
-cp compose.override.example.yaml compose.override.yaml
-```
+Edit `config/himalaya.toml` and `config/ortie.toml`. Replace the example
+addresses. Delete the accounts you don't use. Keep the account names the same
+in both files.
 
 ### 3. Create the PocketID client
 

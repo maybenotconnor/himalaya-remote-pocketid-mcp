@@ -1,5 +1,2 @@
 .env
 secrets/
-config/himalaya.toml
-config/ortie.toml
-compose.override.yaml
