@@ -28,6 +28,17 @@ logging.basicConfig(level=os.environ.get("LOG_LEVEL", "INFO"), format="%(levelna
 # Environment names that hold gateway secrets. They are not passed to Himalaya.
 GATEWAY_SECRET_PREFIXES = ("POCKETID_", "JWT_", "STORAGE_ENCRYPTION_")
 
+# Redirect URIs OAuth clients may register: Claude's callbacks, and loopback on
+# any port and path (FastMCP's rule for a loopback pattern with no port) for
+# Claude Code and other local clients.
+DEFAULT_REDIRECT_URIS = ",".join([
+    "https://claude.ai/api/mcp/auth_callback",
+    "https://claude.com/api/mcp/auth_callback",
+    "http://localhost",
+    "http://127.0.0.1",
+    "http://[::1]",
+])
+
 
 def env(name: str, default: str | None = None, *, required: bool = False) -> str | None:
     """Read NAME, or the file named by NAME_FILE (Docker secrets)."""
@@ -94,10 +105,12 @@ def build_auth():
         base_url=env("MCP_BASE_URL", required=True),
         required_scopes=csv("POCKETID_SCOPES", "openid,profile,email"),
         verify_id_token=True,
-        allowed_client_redirect_uris=csv(
-            "ALLOWED_CLIENT_REDIRECT_URIS",
-            "https://claude.ai/api/mcp/auth_callback,http://localhost:*,http://127.0.0.1:*",
-        ),
+        # Clients may register only these redirect URIs, so an authorization
+        # code can only ever go to Claude or to the user's own machine.
+        allowed_client_redirect_uris=csv("ALLOWED_CLIENT_REDIRECT_URIS", DEFAULT_REDIRECT_URIS),
+        # PocketID 2.14+ rejects an RFC 8707 `resource` that is not a registered
+        # API. FastMCP still checks the client's `resource` against this server.
+        forward_resource=False,
         client_storage=storage,
         jwt_signing_key=env("JWT_SIGNING_KEY", required=True),
     )

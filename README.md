@@ -129,6 +129,41 @@ Claude opens a PocketID login, then a consent page from the gateway. Approve bot
 Back up the `himalaya-data` volume with Restic. It holds the OAuth refresh tokens
 and the gateway's encrypted client store. Without it you must sign in again.
 
+### OAuth security
+
+- **Redirect URI allowlist.** OAuth clients may register only the redirect URIs
+  in `ALLOWED_CLIENT_REDIRECT_URIS` (comma-separated). The default is Claude's
+  two callbacks (`https://claude.ai/api/mcp/auth_callback`,
+  `https://claude.com/api/mcp/auth_callback`) and loopback on any port
+  (`http://localhost`, `http://127.0.0.1`, `http://[::1]`) for Claude Code.
+  An authorization code can only go to one of these.
+- **Consent is bound to the browser.** FastMCP 4.1.6 ties the consent form to a
+  cookie in the browser that opened it, and the PocketID callback to a cookie set
+  on approval. A sign-in link forwarded to someone else fails with HTTP 403.
+  FastMCP before 3.2.0 lacked the first check (GHSA-rww4-4w9c-7733). Keep
+  `FASTMCP_VERSION` at 4.1.6 or later.
+- **PocketID v2.** The gateway does not forward the RFC 8707 `resource`
+  parameter to PocketID, which rejects it unless it names a registered API. The
+  PocketID callback URL must be the exact `https://<host>/auth/callback`, with no
+  wildcard.
+
+### Revoke every client and token
+
+Do this after a security fix, after a PocketID upgrade that rotates its signing
+keys, or if a token may have leaked. A new JWT key invalidates every access and
+refresh token the gateway has issued. Clearing the OAuth store removes every
+registered client and stored PocketID token. The ortie mailbox tokens in the same
+volume are not touched.
+
+```sh
+docker compose stop
+openssl rand -base64 48 | sudo tee secrets/jwt_signing_key > /dev/null
+docker compose run --rm --no-deps --entrypoint sh himalaya-remote-pocketid-mcp -c 'rm -rf /data/oauth/*'
+docker compose up -d
+```
+
+Then remove and re-add the connector in Claude.
+
 ## Notes
 
 - **Gmail with Thunderbird's client** (the default in `ortie.toml`) works

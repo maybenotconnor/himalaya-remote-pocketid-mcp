@@ -19,6 +19,7 @@ services:
       HIMALAYA_ALLOW_WRITE: ${HIMALAYA_ALLOW_WRITE:-true}   # mailbox, flag, add/copy/move/delete tools; save drafts
       HIMALAYA_ALLOW_SEND: ${HIMALAYA_ALLOW_SEND:-false}    # send mail
       HIMALAYA_ACCOUNTS: ${HIMALAYA_ACCOUNTS:-}        # optional subset, comma-separated
+      ALLOWED_CLIENT_REDIRECT_URIS: ${ALLOWED_CLIENT_REDIRECT_URIS:-}  # empty = Claude + loopback (README)
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
 
     volumes:
