@@ -1,8 +1,6 @@
 services:
   himalaya-remote-pocketid-mcp:
     build: .
-    image: himalaya-remote-pocketid-mcp:local
-    pull_policy: build                       # built locally; never pull
     container_name: himalaya-remote-pocketid-mcp
     restart: unless-stopped
 
