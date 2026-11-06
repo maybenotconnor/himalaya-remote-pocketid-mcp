@@ -137,9 +137,12 @@ and the gateway's encrypted client store. Without it you must sign in again.
   after 7 days.
 - **Microsoft 365**: if your tenant blocks user consent, a tenant admin must
   approve "Mozilla Thunderbird" once in Entra ID.
-- **Tool access**: `HIMALAYA_ALLOW_WRITE` adds `message_compose` and
-  `message_add` (save a message, for example a draft, to a mailbox).
-  `HIMALAYA_ALLOW_SEND` adds sending. Himalaya's MCP server has no flag,
-  move or delete tools.
+- **Tool access**: without flags, only read tools are listed.
+  `HIMALAYA_ALLOW_WRITE` adds `mailbox_create`, `mailbox_rename`,
+  `mailbox_delete`, `flag_add`, `flag_set`, `flag_remove`, `message_add`,
+  `message_copy`, `message_move` and `message_delete`, plus the `save`
+  argument of the composers and the `seen` argument of `message_read`.
+  `HIMALAYA_ALLOW_SEND` adds `message_send`, `vacation_set` and the `send`
+  argument of the composers. (Source: `src/mcp.rs`, `TOOLS`.)
 - **Local test without OAuth**: set `MCP_AUTH=none` and keep the port bound
   to `127.0.0.1`. Never expose it that way.

@@ -16,7 +16,7 @@ services:
       POCKETID_CLIENT_SECRET_FILE: /run/secrets/pocketid_client_secret
       JWT_SIGNING_KEY_FILE: /run/secrets/jwt_signing_key
       STORAGE_ENCRYPTION_KEY_FILE: /run/secrets/storage_encryption_key
-      HIMALAYA_ALLOW_WRITE: ${HIMALAYA_ALLOW_WRITE:-true}   # message_compose and message_add (save drafts)
+      HIMALAYA_ALLOW_WRITE: ${HIMALAYA_ALLOW_WRITE:-true}   # mailbox, flag, add/copy/move/delete tools; save drafts
       HIMALAYA_ALLOW_SEND: ${HIMALAYA_ALLOW_SEND:-false}    # send mail
       HIMALAYA_ACCOUNTS: ${HIMALAYA_ACCOUNTS:-}        # optional subset, comma-separated
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
