@@ -36,7 +36,7 @@ mkdir -p secrets && chmod 700 secrets
 openssl rand -base64 48 > secrets/jwt_signing_key
 python3 -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())" > secrets/storage_encryption_key
 # No local Python? Use: openssl rand -base64 32 | tr '+/' '-_' > secrets/storage_encryption_key
-touch secrets/pocketid_client_secret        # filled in step 3
+touch secrets/pocketid_client_secret        # filled in step 3, then chowned
 chmod 600 secrets/*
 ```
 
@@ -59,6 +59,17 @@ with the same settings as opencloud-pocketid-mcp:
 - Allowed user groups: only your own user or group
 
 Put the client secret in `secrets/pocketid_client_secret` and the client ID in `.env`.
+
+Then give the secret files to the container user (UID 10001). Docker Compose
+mounts file secrets with their host owner and mode, so the container can't read
+files that belong to your own user with mode 600:
+
+```sh
+sudo chown 10001:10001 secrets/*
+sudo chmod 400 secrets/*
+```
+
+After this, only root and the container can read them. Use `sudo` to edit a secret.
 
 ### 4. Set `.env` and start
 
