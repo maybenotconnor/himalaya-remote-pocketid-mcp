@@ -50,7 +50,7 @@ smtp.sasl.xoauth2.token.command = ["ortie", "token", "show", "-a", "m365"]
 
 # --- Any IMAP host with an app password (Fastmail, iCloud, Posteo, ...) -------
 # Put the password in ./secrets/<name>_password and list that secret in
-# compose.yaml. Remove this block if you don't need it.
+# compose.override.yaml. Remove this block if you don't need it.
 #[accounts.fastmail]
 #email = "you@fastmail.com"
 #display-name = "Your Name"

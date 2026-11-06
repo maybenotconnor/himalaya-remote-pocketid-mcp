@@ -1,0 +1,15 @@
+# Per-host additions to compose.yaml. Compose reads compose.override.yaml
+# automatically, and git ignores it, so `git pull` never conflicts with it.
+#
+#   cp compose.override.example.yaml compose.override.yaml
+#
+# Add one secret per IMAP account that logs in with a password. The name
+# must match the file in secrets/ and the path in config/himalaya.toml.
+services:
+  himalaya-remote-pocketid-mcp:
+    secrets:
+      - example_password
+
+secrets:
+  example_password:
+    file: ./secrets/example_password
